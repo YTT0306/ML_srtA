@@ -63,14 +63,15 @@ def sample_explain_set(X_train, sample_size, seed):
 def shap_plots(model, X_explain, out_dir, out_prefix, max_display):
     ensure_dir(out_dir)
 
-    base_font = plt.rcParams.get("font.size", 10)
     plt.rcParams.update(
         {
-            "font.size": base_font + 11,
-            "axes.labelsize": base_font + 11,
-            "xtick.labelsize": base_font + 11,
-            "ytick.labelsize": base_font + 11,
-            "legend.fontsize": base_font + 11,
+            "font.size": 16,
+            "axes.labelsize": 16,
+            "xtick.labelsize": 12,
+            "ytick.labelsize": 16,
+            "legend.fontsize": 10,
+            "axes.titlesize": 10,
+            "figure.titlesize": 16,
         }
     )
     plt.rcParams.update(
@@ -94,6 +95,26 @@ def shap_plots(model, X_explain, out_dir, out_prefix, max_display):
         elif shap_values.shape[-1] == 2:
             shap_values = shap_values[:, :, 1]
 
+    def fix_fontsize(fig):
+        for ax in fig.axes:
+            for label in ax.get_xticklabels():
+                label.set_fontsize(16)
+            for label in ax.get_yticklabels():
+                label.set_fontsize(16)
+            if ax.get_xlabel():
+                ax.set_xlabel(ax.get_xlabel(), fontsize=16)
+            if ax.get_ylabel():
+                ax.set_ylabel(ax.get_ylabel(), fontsize=16)
+            # 设置title
+            if ax.get_title():
+                ax.set_title(ax.get_title(), fontsize=16)
+        # 处理legend
+        legends = fig.findobj(lambda x: hasattr(x, 'get_texts'))
+        for legend in legends:
+            if hasattr(legend, 'get_texts'):
+                for text in legend.get_texts():
+                    text.set_fontsize(40)
+
     plt.figure()
     shap.summary_plot(
         shap_values,
@@ -102,11 +123,18 @@ def shap_plots(model, X_explain, out_dir, out_prefix, max_display):
         max_display=10,
     )
     plt.tight_layout()
+    fig = plt.gcf()
+    fix_fontsize(fig)
     ax = plt.gca()
     for side in ["top", "right", "bottom", "left"]:
         ax.spines[side].set_visible(True)
         ax.spines[side].set_color("#000000")
-    plt.xlabel("SHAP value")
+    ax.set_xlabel("SHAP value", fontsize=18)
+    ax.set_ylabel("Feature value", fontsize=18)
+    for label in ax.get_xticklabels():
+        label.set_fontsize(14)
+    for label in ax.get_yticklabels():
+        label.set_fontsize(16)
     style_axes(ax, width=6, height=6, tick_pad=1)
     adjust_left_margin(left=0.42)
     plt.savefig(os.path.join(out_dir, f"{out_prefix}_shap_summary.pdf"), transparent=True)
@@ -126,11 +154,17 @@ def shap_plots(model, X_explain, out_dir, out_prefix, max_display):
         max_display=max_display,
     )
     plt.tight_layout()
+    fig = plt.gcf()
+    fix_fontsize(fig)
     ax = plt.gca()
     for side in ["top", "right", "bottom", "left"]:
         ax.spines[side].set_visible(True)
         ax.spines[side].set_color("#000000")
-    plt.xlabel("SHAP value")
+    ax.set_xlabel("SHAP value", fontsize=16)
+    for label in ax.get_xticklabels():
+        label.set_fontsize(16)
+    for label in ax.get_yticklabels():
+        label.set_fontsize(16)
     style_axes(ax, width=6, height=6, tick_pad=1)
     adjust_left_margin(left=0.42)
     plt.savefig(os.path.join(out_dir, f"{out_prefix}_shap_bar.pdf"), transparent=True)
@@ -152,10 +186,19 @@ def shap_plots(model, X_explain, out_dir, out_prefix, max_display):
             show=False,
         )
         plt.tight_layout()
+        fig = plt.gcf()
+        fix_fontsize(fig)
         ax = plt.gca()
         for side in ["top", "right", "bottom", "left"]:
             ax.spines[side].set_visible(True)
             ax.spines[side].set_color("#000000")
+
+        ax.set_xlabel("SHAP value", fontsize=20)
+        ax.set_ylabel("Feature value", fontsize=20)
+        for label in ax.get_xticklabels():
+            label.set_fontsize(20)
+        for label in ax.get_yticklabels():
+            label.set_fontsize(20)
         style_axes(ax, width=6, height=8, tick_pad=1)
         plt.savefig(os.path.join(out_dir, f"{out_prefix}_shap_dependence.pdf"), transparent=True)
         plt.savefig(
